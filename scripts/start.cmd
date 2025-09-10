@@ -8,7 +8,7 @@ echo Запуск Telegram Maintenance Bot...
 echo Время: %date% %time%
 echo.
 
-cd /d "%~dp0"
+cd /d "%~dp0\.."
 
 :: Проверяем .env файл
 if not exist ".env" (

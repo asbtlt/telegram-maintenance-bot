@@ -1,84 +1,84 @@
-# PowerShell скрипт для запуска Telegram Maintenance Bot
+﻿# PowerShell script for launching Telegram Maintenance Bot
 # start.ps1
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 Write-Host ""
-Write-Host "🔧 Запуск Telegram Maintenance Bot..." -ForegroundColor Cyan
-Write-Host "Время: $(Get-Date -Format 'dd.MM.yyyy HH:mm:ss')" -ForegroundColor Gray
+Write-Host "Starting Telegram Maintenance Bot..." -ForegroundColor Cyan
+Write-Host "Time: $(Get-Date -Format 'dd.MM.yyyy HH:mm:ss')" -ForegroundColor Gray
 Write-Host ""
 
 Set-Location $PSScriptRoot\..
 
-# Проверяем .env файл
+# Check .env file
 if (-not (Test-Path ".env")) {
     if (Test-Path ".env.example") {
-        Write-Host "❌ Файл .env не найден." -ForegroundColor Red
-        Write-Host "Скопируйте .env.example в .env и заполните настройки:" -ForegroundColor Yellow
+        Write-Host "Error: .env file not found." -ForegroundColor Red
+        Write-Host "Copy .env.example to .env and fill in the settings:" -ForegroundColor Yellow
         Write-Host "Copy-Item .env.example .env" -ForegroundColor Yellow
-        Read-Host "Нажмите Enter для выхода"
+        Read-Host "Press Enter to exit"
         exit 1
     } else {
-        Write-Host "❌ Файлы конфигурации не найдены!" -ForegroundColor Red
-        Read-Host "Нажмите Enter для выхода"
+        Write-Host "Error: Configuration files not found!" -ForegroundColor Red
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
 
-# Проверяем Python
+# Check Python
 try {
     $pythonVersion = python --version 2>$null
-    Write-Host "✅ Python найден: $pythonVersion" -ForegroundColor Green
+    Write-Host "Python found: $pythonVersion" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Python не найден. Установите Python 3.7+" -ForegroundColor Red
-    Read-Host "Нажмите Enter для выхода"
+    Write-Host "Error: Python not found. Install Python 3.7+" -ForegroundColor Red
+    Read-Host "Press Enter to exit"
     exit 1
 }
 
-# Создаем venv если нет
+# Create venv if not exists
 if (-not (Test-Path "venv")) {
-    Write-Host "📦 Создаем виртуальное окружение..." -ForegroundColor Yellow
+    Write-Host "Creating virtual environment..." -ForegroundColor Yellow
     python -m venv venv
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ Ошибка создания виртуального окружения" -ForegroundColor Red
-        Read-Host "Нажмите Enter для выхода"
+        Write-Host "Error creating virtual environment" -ForegroundColor Red
+        Read-Host "Press Enter to exit"
         exit 1
     }
 }
 
-# Активируем venv
-Write-Host "🔄 Активируем виртуальное окружение..." -ForegroundColor Yellow
+# Activate venv
+Write-Host "Activating virtual environment..." -ForegroundColor Yellow
 & "venv\Scripts\Activate.ps1"
 
-# Устанавливаем зависимости
-Write-Host "📦 Устанавливаем зависимости..." -ForegroundColor Yellow
+# Install dependencies
+Write-Host "Installing dependencies..." -ForegroundColor Yellow
 pip install -q -r requirements.txt
 
-# Создаем директории
+# Create directories
 @("logs", "data") | ForEach-Object {
     if (-not (Test-Path $_)) {
         New-Item -ItemType Directory -Path $_ -Force | Out-Null
     }
 }
 
-# Проверяем интернет
-Write-Host "🌐 Проверяем подключение к Telegram..." -ForegroundColor Yellow
+# Check internet connection
+Write-Host "Checking connection to Telegram..." -ForegroundColor Yellow
 try {
     Invoke-WebRequest -Uri "https://api.telegram.org" -TimeoutSec 5 -UseBasicParsing | Out-Null
-    Write-Host "✅ Подключение работает" -ForegroundColor Green
+    Write-Host "Connection works" -ForegroundColor Green
 } catch {
-    Write-Host "⚠️  Предупреждение: Не удалось проверить подключение" -ForegroundColor Yellow
+    Write-Host "Warning: Could not verify connection" -ForegroundColor Yellow
 }
 
-# Загружаем .env
-Write-Host "⚙️  Загружаем конфигурацию..." -ForegroundColor Yellow
+# Load .env
+Write-Host "Loading configuration..." -ForegroundColor Yellow
 Get-Content ".env" | ForEach-Object {
     if ($_ -match "^([^#].*)=(.*)$") {
         [Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
     }
 }
 
-# Проверяем обязательные параметры
+# Check required parameters
 $requiredVars = @("MAINTENANCE_BOT_TOKEN", "ADMIN_IDS")
 $missingVars = @()
 
@@ -90,26 +90,26 @@ foreach ($var in $requiredVars) {
 }
 
 if ($missingVars.Count -gt 0) {
-    Write-Host "❌ Не заполнены параметры в .env файле:" -ForegroundColor Red
+    Write-Host "Error: Missing parameters in .env file:" -ForegroundColor Red
     foreach ($var in $missingVars) {
         Write-Host "   - $var" -ForegroundColor Red
     }
-    Read-Host "Нажмите Enter для выхода"
+    Read-Host "Press Enter to exit"
     exit 1
 }
 
 Write-Host ""
-Write-Host "✅ Все проверки пройдены!" -ForegroundColor Green
-Write-Host "🚀 Запускаем бот..." -ForegroundColor Cyan
+Write-Host "All checks passed!" -ForegroundColor Green
+Write-Host "Starting bot..." -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Для остановки нажмите Ctrl+C" -ForegroundColor Gray
+Write-Host "Press Ctrl+C to stop" -ForegroundColor Gray
 Write-Host ""
 
-# Запуск
+# Launch
 try {
     python bot.py
 } catch {
-    Write-Host "❌ Ошибка запуска: $_" -ForegroundColor Red
-    Read-Host "Нажмите Enter для выхода"
+    Write-Host "Launch error: $_" -ForegroundColor Red
+    Read-Host "Press Enter to exit"
     exit 1
 }

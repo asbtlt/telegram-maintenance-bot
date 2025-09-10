@@ -21,7 +21,7 @@ import aiofiles
 import html
 
 __version__ = "1.0.0"
-__author__ = "Your Name"
+__author__ = "asbtlt"
 
 # Настройка логирования
 def setup_logging():
