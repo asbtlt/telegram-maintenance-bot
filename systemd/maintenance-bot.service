@@ -1,0 +1,39 @@
+[Unit]
+Description=Telegram Maintenance Bot
+Documentation=https://github.com/asbtlt/telegram-maintenance-bot
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=botuser
+Group=botuser
+WorkingDirectory=/opt/telegram-maintenance-bot
+Environment=PATH=/opt/telegram-maintenance-bot/venv/bin
+EnvironmentFile=/opt/telegram-maintenance-bot/.env
+ExecStart=/opt/telegram-maintenance-bot/venv/bin/python bot.py
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Output to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=maintenance-bot
+
+# Security settings
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/telegram-maintenance-bot/data /opt/telegram-maintenance-bot/logs
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target

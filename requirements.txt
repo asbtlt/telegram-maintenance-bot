@@ -1,0 +1,11 @@
+# Зависимости для Telegram Maintenance Bot
+# Минимальные требования для работы бота
+
+# Telegram Bot API
+pyTelegramBotAPI>=4.14.0
+
+# Асинхронная работа с файлами
+aiofiles>=23.0.0
+
+# HTTP клиент (требуется для AsyncTeleBot)
+aiohttp>=3.8.0
