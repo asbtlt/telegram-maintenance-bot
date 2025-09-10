@@ -53,7 +53,7 @@ mkdir -p logs data
 
 # Проверяем интернет
 echo "🌐 Проверяем подключение к Telegram..."
-if curl -s --max-time 5 https://api.telegram.org > /dev/null; then
+if curl -s --max-time 5 https://api.telegram.org | grep -q "nginx\|302\|html"; then
     echo "✅ Подключение работает"
 else
     echo "⚠️  Предупреждение: Не удалось проверить подключение"
