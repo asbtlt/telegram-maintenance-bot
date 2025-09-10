@@ -61,7 +61,16 @@ fi
 
 # Загружаем .env
 echo "⚙️  Загружаем конфигурацию..."
-export $(cat .env | grep -v '^#' | xargs)
+while IFS= read -r line || [[ -n "$line" ]]; do
+    # Пропускаем комментарии и пустые строки
+    if [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "${line// }" ]]; then
+        continue
+    fi
+    # Экспортируем переменную
+    if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+        export "$line"
+    fi
+done < .env
 
 # Проверяем обязательные параметры
 if [ -z "$MAINTENANCE_BOT_TOKEN" ] || [ "$MAINTENANCE_BOT_TOKEN" = "YOUR_BOT_TOKEN_HERE" ]; then
