@@ -195,7 +195,7 @@ docker run -d --env-file .env --name maintenance-bot maintenance-bot
 
 - 🐛 **Баги**: [GitHub Issues](https://github.com/asbtlt/telegram-maintenance-bot/issues)
 - 💡 **Предложения**: [GitHub Discussions](https://github.com/asbtlt/telegram-maintenance-bot/discussions)
-- 📧 **Email**: your.email@example.com
+- 📧 **Email**: asbtlt@gmail.com
 
 ## ⭐ Благодарности
 
