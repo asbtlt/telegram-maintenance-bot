@@ -152,11 +152,11 @@ MESSAGES = {
 {hourly_stats}""",
         
         'maintenance_updated': "✅ Информация о техработах обновлена",
-        'invalid_time_format': "❌ Неверный формат времени. Используйте: YYYY-MM-DD HH:MM",
+        'invalid_time_format': "❌ Неверный формат времени. Используйте: H:MM (например: 2:30 для 2 часов 30 минут)",
         'help_admin': """🔧 <b>Команды администратора</b>
 
 /stats - Статистика обращений
-/set_end_time YYYY-MM-DD HH:MM - Установить время окончания
+/set_end_time H:MM - Установить время окончания (например: 2:30)
 /set_reason &lt;текст&gt; - Изменить причину техработ
 /broadcast &lt;сообщение&gt; - Отправить сообщение всем обратившимся
 /clear_stats - Очистить статистику
@@ -361,7 +361,7 @@ async def handle_version(message):
 
 @bot.message_handler(commands=['set_end_time'])
 async def handle_set_end_time(message):
-    """Устанавливает время окончания техработ"""
+    """Устанавливает время окончания техработ относительно текущего времени"""
     if message.from_user.id not in ADMIN_IDS:
         return
     
@@ -369,12 +369,34 @@ async def handle_set_end_time(message):
     
     try:
         time_str = message.text.split(' ', 1)[1]
-        MAINTENANCE_END_TIME = datetime.strptime(time_str, '%Y-%m-%d %H:%M').replace(tzinfo=timezone.utc)
         
-        await bot.reply_to(message, MESSAGES['ru']['maintenance_updated'])
-        await save_stats()
+        # Проверяем формат времени H:MM или HH:MM
+        if ':' in time_str:
+            parts = time_str.split(':')
+            if len(parts) == 2:
+                hours = int(parts[0])
+                minutes = int(parts[1])
+                
+                # Проверяем корректность значений
+                if 0 <= hours <= 23 and 0 <= minutes <= 59:
+                    # Вычисляем время окончания относительно текущего времени
+                    now = datetime.now(timezone.utc)
+                    MAINTENANCE_END_TIME = now + timedelta(hours=hours, minutes=minutes)
+                    
+                    # Форматируем время для отображения
+                    end_time_str = MAINTENANCE_END_TIME.strftime('%Y-%m-%d %H:%M UTC')
+                    response = f"✅ Время окончания техработ установлено на: {end_time_str}\n\n" \
+                              f"⏰ Через {hours} ч. {minutes} мин. от текущего времени"
+                    
+                    await bot.reply_to(message, response)
+                    await save_stats()
+                    
+                    log.info(f"Время окончания техработ установлено: {MAINTENANCE_END_TIME} (через {hours}:{minutes:02d})")
+                    return
         
-        log.info(f"Время окончания техработ установлено: {MAINTENANCE_END_TIME}")
+        # Если формат не подходит, показываем ошибку
+        raise ValueError("Invalid format")
+        
     except (IndexError, ValueError):
         await bot.reply_to(message, MESSAGES['ru']['invalid_time_format'])
 
