@@ -97,8 +97,6 @@ telegram-maintenance-bot/
 │   ├── 🪟 run.cmd           # Запуск PowerShell версии
 │   ├── 🪟 start.ps1         # PowerShell скрипт
 │   └── 🐧 start.sh          # Запуск на Linux/macOS
-├── systemd/
-│   └── 📄 maintenance-bot.service  # Systemd сервис
 └── docs/
     └── 📄 USAGE.md          # Подробная документация
 ```

@@ -261,45 +261,6 @@ networks:
     driver: bridge
 ```
 
-## 🛡 Systemd сервис
-
-### Установка сервиса
-
-```bash
-# 1. Копируем проект
-sudo cp -r telegram-maintenance-bot /opt/
-sudo chown -R botuser:botuser /opt/telegram-maintenance-bot
-
-# 2. Устанавливаем зависимости
-cd /opt/telegram-maintenance-bot
-sudo -u botuser python3 -m venv venv
-sudo -u botuser venv/bin/pip install -r requirements.txt
-
-# 3. Настраиваем конфигурацию
-sudo -u botuser cp .env.example .env
-sudo -u botuser nano .env
-
-# 4. Устанавливаем сервис
-sudo cp systemd/maintenance-bot.service /etc/systemd/system/
-sudo nano /etc/systemd/system/maintenance-bot.service  # Проверьте пути
-
-# 5. Запускаем сервис
-sudo systemctl daemon-reload
-sudo systemctl enable maintenance-bot
-sudo systemctl start maintenance-bot
-```
-
-### Управление сервисом
-
-```bash
-# Статус
-sudo systemctl status maintenance-bot
-
-# Запуск/остановка
-sudo systemctl start maintenance-bot
-sudo systemctl stop maintenance-bot
-sudo systemctl restart maintenance-bot
-
 # Логи
 sudo journalctl -u maintenance-bot -f
 sudo journalctl -u maintenance-bot --since today
